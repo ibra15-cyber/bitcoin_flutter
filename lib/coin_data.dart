@@ -27,7 +27,7 @@ const List<String> currenciesList = [
 
 const List<String> cryptoList = ['BTC', 'ETH', 'LTC'];
 
-const apiKey = "44B164E2-1799-48A3-B70A-18822286C181";
+const apiKey = "YOUR APIKEY";
 
 class CoinData {
   //instead of hardcoding selected currency in the url
