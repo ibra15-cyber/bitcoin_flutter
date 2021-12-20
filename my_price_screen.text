@@ -1,0 +1,259 @@
+class PriceScreen extends StatefulWidget {
+  @override
+  _PriceScreenState createState() => _PriceScreenState();
+}
+
+class _PriceScreenState extends State<PriceScreen> {
+
+  var data;
+  String rateS = '';
+  String selectedCurrency = 'AUD';
+  String cryptoCurrency = 'ETH';
+
+  Future<String> getData() async {
+
+      setState(() async {cryptoCurrency = cryptoList[0];
+        var url = "https://rest.coinapi.io/v1/exchangerate/$cryptoCurrency/$selectedCurrency?apikey=$apiKey";
+        http.Response response = await http.get(Uri.parse(url));
+        try {
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            double rate = data['rate'];
+            setState(() {
+              rateS = rate.toStringAsFixed(0);
+            });
+            // print(rateS);
+            // return rateS;
+          } else {
+            print(response.statusCode);
+          }
+        }catch(e){
+          print(e);
+        }});
+    return '';
+  }
+
+  Future<String> getData2() async {
+
+
+      setState(() async {
+        cryptoCurrency = cryptoList[1];
+        var url = "https://rest.coinapi.io/v1/exchangerate/$cryptoCurrency/$selectedCurrency?apikey=$apiKey";
+        http.Response response = await http.get(Uri.parse(url));
+        try {
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            double rate = data['rate'];
+            setState(() {
+              rateS = rate.toStringAsFixed(0);
+            });
+            // print(rateS);
+            // return rateS;
+          } else {
+            print(response.statusCode);
+          }
+        }catch(e){
+          print(e);
+        }});
+    return '';
+  }
+
+  Future<String> getData3() async {
+
+      setState(() async {
+        cryptoCurrency = cryptoList[2];
+        var url = "https://rest.coinapi.io/v1/exchangerate/$cryptoCurrency/$selectedCurrency?apikey=$apiKey";
+        http.Response response = await http.get(Uri.parse(url));
+        print(cryptoCurrency);
+        try {
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            double rate = data['rate'];
+            setState(() {
+              rateS = rate.toStringAsFixed(0);
+            });
+            // print(rateS);
+            // return rateS;
+          } else {
+            print(response.statusCode);
+          }
+        }catch(e){
+          print(e);
+        }});
+
+    return '';
+  }
+
+
+  DropdownButton<String> getDropDownButton() {
+    //create a list to hold the new drop down items widget
+    List<DropdownMenuItem<String>> newList = [];
+
+    //loop into the list possible after import
+    //make a drop down menu item for each currency or item
+    //for (int i = 0; i<currenciesList.length; i++){
+    //  currency = currenciesList[i]
+    for (String currency in currenciesList) {
+      //i did it but forgot to assign it to a variable
+      //which will not have worked because something needs to contain each variable
+      var newItem = DropdownMenuItem(
+        value: currency,
+        child: Text(currency),
+      );
+      newList.add(newItem);
+    }
+
+    return DropdownButton<String>(
+      // dropdowns has a property value
+      //initial content to display
+      value: selectedCurrency,
+      //and our dropdownbutton takes a property "items" that takes list
+      items: newList,
+      //we are passing a dropdown menu items as list
+      //when an argument is passed, print what was passed
+      //note here value is anything item selected
+      //so anytime we changed to select menu item that item is printed
+      onChanged: (item) {
+        print(item);
+        //so instead of printing the value in console we want it to appear as the selected
+        setState(() {
+          selectedCurrency = item!;
+          // currenciesList = item!;
+        });
+      },
+    );
+  }
+
+  //for ios
+  CupertinoPicker getPickerIOs() {
+
+    //we are only replacing the list of children which consist of Text widget
+    List<Text> newList = [];
+
+    for (String currency in currenciesList) {
+      var text = Text(currency);
+      newList.add(text);
+    }
+    return CupertinoPicker(
+      //cupertino picker is for ios
+      //item extend sets height
+      //on selected item changed similar to onCharge in dropdown
+      //instead of taking dropDownMenuItems as child
+      //picker is taking children widgets directly eg text
+      //in menu items menuItems must take child Text
+      itemExtent: 32.0,
+      onSelectedItemChanged: (int value) {
+        setState(() {
+          // for (int i= 0; i<cryptoList.length; i++)
+          //   cryptoCurrency = cryptoList[i];
+          // makeCards();
+          //anytime the wheel moves selected currency is the string inside currenciesList
+          selectedCurrency = currenciesList[value];
+          //update the url too to pass current currency string
+          getData();
+          getData2();
+          getData3();
+
+        });
+        print(value);
+      },
+      children: newList,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    getData();
+    getData2();
+    getData3();
+    // getLocation();
+  }
+
+  Column makeCards(){
+    List<CryptoCard> cryptoCards = [];
+    for(String crypto in cryptoList)  {
+      cryptoCards.add(
+          CryptoCard(cryptoCurrency: crypto, rateS: rateS, selectedCurrency: selectedCurrency),
+      );
+    }
+    return Column(
+      children: cryptoCards,
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    // getData();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('🤑 Coin Ticker'),
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          makeCards(),
+          Container(
+            height: 150.0,
+            alignment: Alignment.center,
+            padding: EdgeInsets.only(bottom: 30.0),
+            color: Colors.lightBlue,
+            //OUR CONTAINER TAKES A DROPDOWNBUTTON
+            child: getPickerIOs(),
+            // Platform.isIOS? getPickerIOs() : getDropDownButton(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CryptoCard extends StatelessWidget {
+  const CryptoCard({
+    Key? key,
+    required this.cryptoCurrency,
+    required this.rateS,
+    required this.selectedCurrency,
+  }) : super(key: key);
+
+  final String cryptoCurrency;
+  final String rateS;
+  final String selectedCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+      child: Card(
+        color: Colors.lightBlueAccent,
+        elevation: 5.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+          child: Text(
+            '1 $cryptoCurrency = $rateS $selectedCurrency',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+//final gold
+//what happen is we got a card to repeat three times and also pass diff crypto currency
+//we refactor the card into a class making sure all properties of card that are immutable
+//appear in the build. eg moving the padding of the card which didnt come with the along in the card class
+//we can repeat card class 3 times but we are left with the issue of passing 3 diff variables
+//so we chose to create a method that returns of course a column widget (for they are 3 cards in a col)
+//we iterate through the crypto currency creating 3 diff cards with diff properties.
+//then finally calling the method
